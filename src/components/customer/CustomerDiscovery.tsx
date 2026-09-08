@@ -23,8 +23,10 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { MEDICINES } from '../../data/mockData';
-import { Medicine, UserProfile } from '../../types';
+import { Medicine, UserProfile, FulfillmentMode, PickupPharmacyLocation } from '../../types';
 import { LogIn } from 'lucide-react';
+import { PharmacyPickupMap } from './PharmacyPickupMap';
+import { PHARMACY_PICKUP_LOCATIONS } from '../../data/pharmacyLocations';
 
 interface CustomerDiscoveryProps {
   onSelectMedicine: (medicine: Medicine) => void;
@@ -34,6 +36,11 @@ interface CustomerDiscoveryProps {
   currentUser?: UserProfile | null;
   onOpenAuth?: (mode: 'login' | 'register') => void;
   onNavigateToProfile?: () => void;
+  fulfillmentMode?: FulfillmentMode;
+  onFulfillmentModeChange?: (mode: FulfillmentMode) => void;
+  selectedPharmacy?: PickupPharmacyLocation;
+  onSelectPharmacy?: (pharmacy: PickupPharmacyLocation) => void;
+  onShowToast?: (type: 'success' | 'info' | 'warning' | 'error', title: string, message: string) => void;
 }
 
 export const CustomerDiscovery: React.FC<CustomerDiscoveryProps> = ({
@@ -43,7 +50,12 @@ export const CustomerDiscovery: React.FC<CustomerDiscoveryProps> = ({
   onOpenRxUpload,
   currentUser = null,
   onOpenAuth = (_mode: 'login' | 'register') => {},
-  onNavigateToProfile = () => {}
+  onNavigateToProfile = () => {},
+  fulfillmentMode = 'delivery',
+  onFulfillmentModeChange = (_mode: FulfillmentMode) => {},
+  selectedPharmacy = PHARMACY_PICKUP_LOCATIONS[0],
+  onSelectPharmacy = (_pharmacy: PickupPharmacyLocation) => {},
+  onShowToast = (_type: 'success' | 'info' | 'warning' | 'error', _title: string, _message: string) => {}
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [savedItem, setSavedItem] = useState(false);
@@ -62,13 +74,27 @@ export const CustomerDiscovery: React.FC<CustomerDiscoveryProps> = ({
       {/* Top Navigation Shell (Responsive Mobile Docked) */}
       <header className="sticky top-0 z-40 bg-[#f8f9ff] shadow-sm border-b border-[#bcc9c6]/40">
         <div className="flex justify-between items-center w-full px-4 h-12 max-w-md mx-auto">
-          {/* Location Picker */}
+          {/* Location Picker (Fulfillment mode reactive) */}
           <div className="flex items-center space-x-2">
-            <MapPin className="text-[#00685f] w-5 h-5 flex-shrink-0" />
+            {fulfillmentMode === 'pickup' ? (
+              <Store className="text-[#00685f] w-5 h-5 flex-shrink-0" />
+            ) : (
+              <MapPin className="text-[#00685f] w-5 h-5 flex-shrink-0" />
+            )}
             <div className="flex flex-col">
-              <span className="text-[10px] text-[#3d4947] leading-none">Deliver to:</span>
-              <button className="flex items-center space-x-1 text-left active:scale-95 transition-transform duration-150">
-                <span className="text-xs font-semibold text-[#0b1c30]">10001 New York</span>
+              <span className="text-[10px] text-[#3d4947] leading-none">
+                {fulfillmentMode === 'pickup' ? 'Pickup Store:' : 'Deliver to:'}
+              </span>
+              <button 
+                onClick={() => onFulfillmentModeChange(fulfillmentMode === 'delivery' ? 'pickup' : 'delivery')}
+                className="flex items-center space-x-1 text-left active:scale-95 transition-transform duration-150"
+                title="Click to toggle Delivery / In-store Pickup"
+              >
+                <span className="text-xs font-semibold text-[#0b1c30] max-w-[125px] truncate">
+                  {fulfillmentMode === 'pickup' 
+                    ? `${selectedPharmacy.name.split(' ')[0]} (${selectedPharmacy.distanceMiles ?? 0.4}m)` 
+                    : '10001 New York'}
+                </span>
                 <ChevronDown className="text-[#00685f] w-3 h-3" />
               </button>
             </div>
@@ -171,6 +197,15 @@ export const CustomerDiscovery: React.FC<CustomerDiscoveryProps> = ({
             </div>
           </div>
         </section>
+
+        {/* Visual Component: Nearby Pharmacy Pickup Locations (GPS Coordinates + Delivery/Pickup Switcher) */}
+        <PharmacyPickupMap
+          fulfillmentMode={fulfillmentMode}
+          onFulfillmentModeChange={onFulfillmentModeChange}
+          selectedPharmacy={selectedPharmacy}
+          onSelectPharmacy={onSelectPharmacy}
+          onShowToast={onShowToast}
+        />
 
         {/* Prescription Upload CTA Card */}
         <section className="bg-white border-2 border-dashed border-[#6bd8cb] rounded-xl p-3.5 shadow-sm">

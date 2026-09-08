@@ -113,6 +113,7 @@ export default function App() {
             onOpenAuth={handleOpenAuth}
             onLogout={handleLogout}
             onUpdateUser={handleUpdateUser}
+            onShowToast={addToast}
           />
         )}
 

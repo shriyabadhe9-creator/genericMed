@@ -13,22 +13,28 @@ import {
   ChevronRight, 
   AlertCircle,
   HelpCircle,
-  Truck
+  Truck,
+  Store,
+  QrCode
 } from 'lucide-react';
-import { CartItem } from '../../types';
+import { CartItem, FulfillmentMode, PickupPharmacyLocation } from '../../types';
 
 interface CustomerCheckoutProps {
   cart: CartItem[];
   onUpdateQuantity: (index: number, delta: number) => void;
   onBack: () => void;
   onPlaceOrder: () => void;
+  fulfillmentMode?: FulfillmentMode;
+  selectedPharmacy?: PickupPharmacyLocation;
 }
 
 export const CustomerCheckout: React.FC<CustomerCheckoutProps> = ({
   cart,
   onUpdateQuantity,
   onBack,
-  onPlaceOrder
+  onPlaceOrder,
+  fulfillmentMode = 'pickup',
+  selectedPharmacy
 }) => {
   const [secondsRemaining, setSecondsRemaining] = useState(899); // 14:59
   const [paymentMethod, setPaymentMethod] = useState<'apple_pay' | 'card' | 'fsa'>('apple_pay');
@@ -218,29 +224,68 @@ export const CustomerCheckout: React.FC<CustomerCheckoutProps> = ({
           </p>
         </section>
 
-        {/* Delivery Address Card */}
-        <section className="bg-white border border-[#bcc9c6] rounded-xl p-3.5 shadow-sm space-y-2">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <MapPin className="w-4 h-4 text-[#00685f]" />
-              <h3 className="text-xs font-bold text-[#0b1c30] uppercase tracking-wider">
-                Delivery Address
-              </h3>
+        {/* Delivery / Pickup Fulfillment Card */}
+        {fulfillmentMode === 'pickup' && selectedPharmacy ? (
+          <section className="bg-white border-2 border-[#00685f] rounded-xl p-3.5 shadow-sm space-y-2">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-2">
+                <Store className="w-4 h-4 text-[#00685f]" />
+                <h3 className="text-xs font-bold text-[#0b1c30] uppercase tracking-wider">
+                  In-Store Pickup Hub
+                </h3>
+              </div>
+              <span className="text-[10px] font-bold bg-[#ffdad6] text-[#ba1a1a] px-2 py-0.5 rounded-full">
+                FREE PICKUP
+              </span>
             </div>
-            <button className="text-xs text-[#00685f] font-semibold hover:underline">
-              Change
-            </button>
-          </div>
 
-          <div className="text-xs text-[#3d4947] space-y-0.5">
-            <p className="font-bold text-[#0b1c30]">Eleanor Vance (Home)</p>
-            <p>742 Evergreen Terrace, Springfield, OR 97477</p>
-            <p className="text-[11px] text-[#00685f] font-medium pt-1 flex items-center gap-1">
-              <Truck className="w-3 h-3" />
-              Temperature-controlled courier dispatch arrives in ~25-45 mins
-            </p>
-          </div>
-        </section>
+            <div className="text-xs text-[#3d4947] space-y-1">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="font-bold text-sm text-[#0b1c30]">{selectedPharmacy.name}</p>
+                  <p>{selectedPharmacy.address}, {selectedPharmacy.city}, {selectedPharmacy.state} {selectedPharmacy.zipCode}</p>
+                  <p className="text-[11px] font-mono text-[#00685f] pt-0.5">
+                    Coordinates: {selectedPharmacy.coordinates.lat.toFixed(4)}° N, {Math.abs(selectedPharmacy.coordinates.lng).toFixed(4)}° W ({selectedPharmacy.distanceMiles ?? 0.4} mi away)
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-[#eff4ff] rounded-lg p-2 flex items-center justify-between mt-1 text-[11px]">
+                <span className="text-[#006948] font-bold flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  Ready in {selectedPharmacy.estimatedReadyMins} minutes
+                </span>
+                <span className="text-slate-600 flex items-center gap-1">
+                  <QrCode className="w-3.5 h-3.5 text-[#00685f]" />
+                  Express Counter PIN: #GM-928
+                </span>
+              </div>
+            </div>
+          </section>
+        ) : (
+          <section className="bg-white border border-[#bcc9c6] rounded-xl p-3.5 shadow-sm space-y-2">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-2">
+                <MapPin className="w-4 h-4 text-[#00685f]" />
+                <h3 className="text-xs font-bold text-[#0b1c30] uppercase tracking-wider">
+                  Delivery Address
+                </h3>
+              </div>
+              <button className="text-xs text-[#00685f] font-semibold hover:underline">
+                Change
+              </button>
+            </div>
+
+            <div className="text-xs text-[#3d4947] space-y-0.5">
+              <p className="font-bold text-[#0b1c30]">Eleanor Vance (Home)</p>
+              <p>742 Evergreen Terrace, Springfield, OR 97477</p>
+              <p className="text-[11px] text-[#00685f] font-medium pt-1 flex items-center gap-1">
+                <Truck className="w-3 h-3" />
+                Temperature-controlled courier dispatch arrives in ~25-45 mins
+              </p>
+            </div>
+          </section>
+        )}
 
         {/* Payment Options */}
         <section className="bg-white border border-[#bcc9c6] rounded-xl p-3.5 shadow-sm space-y-2.5">
@@ -297,8 +342,8 @@ export const CustomerCheckout: React.FC<CustomerCheckoutProps> = ({
               <span>${packagingFee.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-[#006948]">
-              <span>Delivery Fee (Partner Promo)</span>
-              <span className="font-bold">FREE</span>
+              <span>{fulfillmentMode === 'pickup' ? 'Direct Store Pickup Fee' : 'Delivery Fee (Partner Promo)'}</span>
+              <span className="font-bold">FREE ($0.00)</span>
             </div>
             <div className="flex justify-between text-[#006948] font-semibold pt-1 border-t border-[#bcc9c6]/40">
               <span>Platform Savings</span>

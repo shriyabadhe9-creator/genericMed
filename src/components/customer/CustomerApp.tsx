@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { CustomerTab, Medicine, MedicineOffer, CartItem } from '../../types';
+import { CustomerTab, Medicine, MedicineOffer, CartItem, UserProfile, FulfillmentMode, PickupPharmacyLocation } from '../../types';
 import { MEDICINES, PRIMARY_ORDER } from '../../data/mockData';
+import { PHARMACY_PICKUP_LOCATIONS } from '../../data/pharmacyLocations';
 import { CustomerDiscovery } from './CustomerDiscovery';
 import { CustomerCompare } from './CustomerCompare';
 import { CustomerCheckout } from './CustomerCheckout';
 import { CustomerOrderTracking } from './CustomerOrderTracking';
 import { PrescriptionScannerModal } from './PrescriptionScannerModal';
 import { CustomerProfileView } from './CustomerProfileView';
-import { UserProfile } from '../../types';
 import { 
   Home, 
   Layers, 
@@ -29,6 +29,7 @@ interface CustomerAppProps {
   onOpenAuth?: (mode: 'login' | 'register') => void;
   onLogout?: () => void;
   onUpdateUser?: (updated: Partial<UserProfile>) => void;
+  onShowToast?: (type: 'success' | 'info' | 'warning' | 'error', title: string, message: string) => void;
 }
 
 export const CustomerApp: React.FC<CustomerAppProps> = ({
@@ -38,8 +39,11 @@ export const CustomerApp: React.FC<CustomerAppProps> = ({
   onOpenAuth = (_mode: 'login' | 'register') => {},
   onLogout = () => {},
   onUpdateUser = () => {},
+  onShowToast,
 }) => {
   const [activeTab, setActiveTab] = useState<CustomerTab>('home');
+  const [fulfillmentMode, setFulfillmentMode] = useState<FulfillmentMode>('pickup');
+  const [selectedPharmacy, setSelectedPharmacy] = useState<PickupPharmacyLocation>(PHARMACY_PICKUP_LOCATIONS[0]);
   const [selectedMedicine, setSelectedMedicine] = useState<Medicine>(MEDICINES[0]);
   const [cart, setCart] = useState<CartItem[]>([
     {
@@ -137,6 +141,11 @@ export const CustomerApp: React.FC<CustomerAppProps> = ({
             currentUser={currentUser}
             onOpenAuth={onOpenAuth}
             onNavigateToProfile={() => setActiveTab('profile')}
+            fulfillmentMode={fulfillmentMode}
+            onFulfillmentModeChange={setFulfillmentMode}
+            selectedPharmacy={selectedPharmacy}
+            onSelectPharmacy={setSelectedPharmacy}
+            onShowToast={onShowToast}
           />
         )}
 
@@ -156,6 +165,8 @@ export const CustomerApp: React.FC<CustomerAppProps> = ({
             onUpdateQuantity={handleUpdateQuantity}
             onBack={() => setActiveTab('compare')}
             onPlaceOrder={handlePlaceOrder}
+            fulfillmentMode={fulfillmentMode}
+            selectedPharmacy={selectedPharmacy}
           />
         )}
 

@@ -172,3 +172,33 @@ export interface UserProfile {
   // Admin details
   department?: string;
 }
+
+export type FulfillmentMode = 'delivery' | 'pickup';
+
+export interface Coordinates {
+  lat: number;
+  lng: number;
+}
+
+export interface PickupPharmacyLocation {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  coordinates: Coordinates;
+  distanceMiles?: number;
+  estimatedReadyMins: number;
+  openHours: string;
+  isOpenNow: boolean;
+  phone: string;
+  licenseNumber: string;
+  rating: number;
+  reviewCount: number;
+  hasDriveThru: boolean;
+  has24HourService: boolean;
+  hasExpressCounter: boolean;
+  inStockGenericCount: number;
+  badge?: string;
+}

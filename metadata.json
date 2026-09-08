@@ -1,6 +1,6 @@
 {
   "name": "genericMed - Generic Medicine Platform",
   "description": "Online generic medicine price comparison, prescription verification, order fulfillment tracking, pharmacy partner console, and enterprise operations portal.",
-  "requestFramePermissions": ["camera"],
+  "requestFramePermissions": ["camera", "geolocation"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -6,6 +6,8 @@ import { CustomerCompare } from './CustomerCompare';
 import { CustomerCheckout } from './CustomerCheckout';
 import { CustomerOrderTracking } from './CustomerOrderTracking';
 import { PrescriptionScannerModal } from './PrescriptionScannerModal';
+import { CustomerProfileView } from './CustomerProfileView';
+import { UserProfile } from '../../types';
 import { 
   Home, 
   Layers, 
@@ -23,11 +25,19 @@ import {
 interface CustomerAppProps {
   isMobileFrame: boolean;
   onOpenClinicalVerificationModal?: () => void;
+  currentUser?: UserProfile | null;
+  onOpenAuth?: (mode: 'login' | 'register') => void;
+  onLogout?: () => void;
+  onUpdateUser?: (updated: Partial<UserProfile>) => void;
 }
 
 export const CustomerApp: React.FC<CustomerAppProps> = ({
   isMobileFrame,
   onOpenClinicalVerificationModal,
+  currentUser = null,
+  onOpenAuth = (_mode: 'login' | 'register') => {},
+  onLogout = () => {},
+  onUpdateUser = () => {},
 }) => {
   const [activeTab, setActiveTab] = useState<CustomerTab>('home');
   const [selectedMedicine, setSelectedMedicine] = useState<Medicine>(MEDICINES[0]);
@@ -124,6 +134,9 @@ export const CustomerApp: React.FC<CustomerAppProps> = ({
             onNavigateToCart={() => setActiveTab('checkout')}
             cartCount={cartCount}
             onOpenRxUpload={() => setIsRxModalOpen(true)}
+            currentUser={currentUser}
+            onOpenAuth={onOpenAuth}
+            onNavigateToProfile={() => setActiveTab('profile')}
           />
         )}
 
@@ -195,46 +208,13 @@ export const CustomerApp: React.FC<CustomerAppProps> = ({
         )}
 
         {activeTab === 'profile' && (
-          <div className="p-4 space-y-4 min-h-[600px]">
-            <h2 className="text-lg font-bold text-[#0b1c30]">Patient Account & Prescriptions</h2>
-            <div className="bg-white border border-[#bcc9c6] rounded-xl p-4 shadow-sm space-y-3">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 rounded-full bg-[#dce9ff] text-[#00685f] flex items-center justify-center font-bold text-lg">
-                  EV
-                </div>
-                <div>
-                  <h3 className="font-bold text-[#0b1c30]">Eleanor Vance</h3>
-                  <p className="text-xs text-[#3d4947]">eleanor.vance@example.com • 58 Yrs</p>
-                </div>
-              </div>
-
-              <div className="border-t border-slate-100 pt-3 space-y-2 text-xs">
-                <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span className="text-[#3d4947]">Primary Physician</span>
-                  <span className="font-semibold text-[#0b1c30]">Dr. Robert H. Smith MD</span>
-                </div>
-                <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span className="text-[#3d4947]">Known Drug Allergies</span>
-                  <span className="font-semibold text-[#006948]">NKDA (No Known Allergies)</span>
-                </div>
-                <div className="flex justify-between py-1">
-                  <span className="text-[#3d4947]">Active Prescriptions</span>
-                  <span className="font-semibold text-[#00685f]">2 on file</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Link to Pharmacist clinical modal for convenience */}
-            {onOpenClinicalVerificationModal && (
-              <button
-                onClick={onOpenClinicalVerificationModal}
-                className="w-full py-2.5 px-3 bg-[#eff4ff] border border-[#6bd8cb] text-[#00685f] rounded-lg text-xs font-bold flex items-center justify-center gap-2 hover:bg-[#dce9ff]"
-              >
-                <ShieldCheck className="w-4 h-4" />
-                Inspect Licensed Pharmacist Verification Modal
-              </button>
-            )}
-          </div>
+          <CustomerProfileView
+            currentUser={currentUser}
+            onOpenAuth={onOpenAuth}
+            onLogout={onLogout}
+            onOpenClinicalVerificationModal={onOpenClinicalVerificationModal}
+            onUpdateUser={onUpdateUser}
+          />
         )}
 
         {/* Docked Mobile Bottom Navigation Bar */}

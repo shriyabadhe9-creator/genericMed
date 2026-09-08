@@ -147,3 +147,28 @@ export interface ToastNotification {
   message: string;
   timestamp: string;
 }
+
+export type UserRole = 'customer' | 'partner' | 'admin' | 'prescriber';
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: UserRole;
+  avatarInitials: string;
+  memberSince?: string;
+  isVerified?: boolean;
+  // Patient details
+  age?: number;
+  allergies?: string;
+  activeRxCount?: number;
+  primaryPhysician?: string;
+  shippingAddress?: string;
+  // Partner details
+  pharmacyName?: string;
+  licenseNumber?: string;
+  deaReg?: string;
+  // Admin details
+  department?: string;
+}

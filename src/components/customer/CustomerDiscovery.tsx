@@ -23,20 +23,27 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { MEDICINES } from '../../data/mockData';
-import { Medicine } from '../../types';
+import { Medicine, UserProfile } from '../../types';
+import { LogIn } from 'lucide-react';
 
 interface CustomerDiscoveryProps {
   onSelectMedicine: (medicine: Medicine) => void;
   onNavigateToCart: () => void;
   cartCount: number;
   onOpenRxUpload: () => void;
+  currentUser?: UserProfile | null;
+  onOpenAuth?: (mode: 'login' | 'register') => void;
+  onNavigateToProfile?: () => void;
 }
 
 export const CustomerDiscovery: React.FC<CustomerDiscoveryProps> = ({
   onSelectMedicine,
   onNavigateToCart,
   cartCount,
-  onOpenRxUpload
+  onOpenRxUpload,
+  currentUser = null,
+  onOpenAuth = (_mode: 'login' | 'register') => {},
+  onNavigateToProfile = () => {}
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [savedItem, setSavedItem] = useState(false);
@@ -70,8 +77,26 @@ export const CustomerDiscovery: React.FC<CustomerDiscoveryProps> = ({
           {/* Center Brand genericMed */}
           <span className="text-lg font-bold text-[#00685f] tracking-tight">genericMed</span>
 
-          {/* Cart Icon */}
-          <div className="flex items-center">
+          {/* Cart & User Profile Icons */}
+          <div className="flex items-center space-x-1.5">
+            {currentUser ? (
+              <button
+                onClick={onNavigateToProfile}
+                title={`Logged in as ${currentUser.name}`}
+                className="w-7 h-7 rounded-full bg-[#dce9ff] text-[#00685f] font-bold text-[11px] flex items-center justify-center border border-[#6bd8cb] hover:ring-2 hover:ring-[#00685f]/30 transition-all"
+              >
+                {currentUser.avatarInitials}
+              </button>
+            ) : (
+              <button
+                onClick={() => onOpenAuth('login')}
+                className="px-2 py-1 bg-[#eff4ff] text-[#00685f] text-[11px] font-bold rounded-lg hover:bg-[#dce9ff] transition-colors flex items-center space-x-1 border border-[#bcc9c6]"
+              >
+                <LogIn className="w-3 h-3" />
+                <span>Log In</span>
+              </button>
+            )}
+
             <button 
               onClick={onNavigateToCart}
               aria-label="Cart" 
